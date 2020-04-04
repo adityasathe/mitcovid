@@ -1,0 +1,21 @@
+I think I have been exposed to COVID-19: In the last 14 days, which of the following best applies to you regarding your exposures?
+I was in contact with someone with cough, fever, and/or difficulty breathing who has not been tested for COVID-19:: Self-quarantine at your home for the next 14 days and actively monitor if you develop any symptoms (cough, fever, chills, sweats, or difficulty breathing). Please limit your exposure to others (e.g. grocery shopping, seeing family outside your home) unless absolutely necessary. Wear a mask if you leave your home to prevent spreading illness to others if you have indeed been exposed. If you develop symptoms, call your primary healthcare provider for clinical advice and to discuss if you need testing.
+I was in contact with someone who has tested positive for COVID-19:: Self-quarantine at your home for the next 14 days and actively monitor if you develop any symptoms (cough, fever, chills, sweats, or difficulty breathing). Please limit your exposure to others (e.g. grocery shopping, seeing family outside your home) unless absolutely necessary. Wear a mask if you leave your home to prevent spreading illness to others if you have been exposed. If you develop symptoms, call your primary healthcare provider for clinical advice and to discuss your need for testing.
+I live with someone who is COVID-19 positive:: Self-quarantine at your home for the next 14 days and actively monitor if you develop any symptoms (cough, fever, chills, sweats, or difficulty breathing). Please limit your exposure to others (e.g. grocery shopping, seeing family outside your home) unless absolutely necessary. Wear a mask if you leave your home to prevent spreading illness to others if you have been exposed. If you develop symptoms, call your primary healthcare provider for clinical advice and to discuss your need for testing.
+I think I have symptoms of COVID-19: What symptoms are you currently experiencing
+New or worsening cough: Have your symptoms worsened since they started?
+Fever, chills, or sweats: Have your symptoms worsened since they started?
+Difficulty breathing (Not severe): Have your symptoms worsened since they started?
+Yes:: You should self-quarantine at your home for the next 14 days to prevent potentially spreading your illness to others or becoming worse yourself. Continue to monitor your symptoms and call your primary healthcare provider for clinical advice and to discuss if you need testing. If your symptoms continue to progress and you show any of the following: severe shortness of breath, chest pain or pressure, confusion, or blue face or lips, call 911 immediately to seek care.
+No:: Self-quarantine at your home for the next 14 days and monitor your symptoms. Please limit your exposure to others (e.g. grocery shopping, seeing family outside your home) unless absolutely necessary. Wear a mask if you leave your home to prevent spreading your illness to others. If your symptoms worsen, call your primary healthcare provider for clinical advice and to discuss if you need testing. If your symptoms progress significantly and you show any of the following: severe shortness of breath, chest pain or pressure, confusion, or blue face or lips, call 911 immediately to seek care.
+Social distancing:What would you like to know about social distancing?
+Benefits of social distancing::Given your demographics, social distancing can help you in x,y,z ways and protect those around you
+What is social distancing:: Social distancing is the act of isolating yourself from large crowds for the purpose of reducing the spread of disease and here is how you do it
+Why should I care::Even though individuals at your age have a lower mortality rate, you should engage in these practices to flatten the curve
+How do I properly engage in daily activities:What activities are you interested in?
+Recreation/exercise::description of safe exercise and outdoor practices based on health and demographic info
+Grocery/supply shopping:: you may go to grocery store or you really shouldn’t go to the grocery store
+Occupation:What does your job involve?
+Isolated work:: you may go to work
+Close contact with other humans:: please work remotely
+Work space is crowded with other people::please work remotely
