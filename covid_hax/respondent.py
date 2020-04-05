@@ -1,6 +1,10 @@
 import numpy as np
 import random
 
+SEED = 0
+np.random.seed(SEED)
+random.seed(SEED)
+
 
 class BiasHelper:
 
@@ -22,8 +26,8 @@ class Respondent:
         self.biases = biases  # -> Dict[str, str]
 
     def answer_question(self, query_node):
-        if query_node.question in self.biases:
-            return self.biases[query_node.question]  # Get the biased answer here
+        if query_node.value in self.biases:
+            return self.biases[query_node.value]  # Get the biased answer here
         else:
             choices = [answer for answer in query_node.answers.keys()]
             return np.random.choice(choices)

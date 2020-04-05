@@ -5,90 +5,144 @@ from parsing import *
 
 import numpy as np
 
+SEED = 0
+np.random.seed(SEED)
+
 initial_questions = read_questions()
 initial_answers, initial_conclusions = read_answers()
+
+SOFT_WEIGHT = 0.95
+NUM_QUESTIONS_TO_ASK = 4
 
 # Quick hack
 remove_list = []
 for q in initial_questions:
     for a in initial_questions[q]:
-        if a not in initial_answers:
+        hardwired = '*' + a
+        if a not in initial_answers and hardwired not in initial_answers:
             remove_list.append(a)
     for a in remove_list:
         initial_questions[q].remove(a)
     remove_list.clear()
 
-def build_graph(answers, questions, conclusions):
-    nodes = [build_node(q, answers) for q in questions]
+
+def get_next_question_initial_weights(answer, best_next_question, hard_bias):
+    best_next_question_weight = SOFT_WEIGHT
+    if hard_bias:
+        best_next_question_weight = 1.0
+
+    other_questions_weight = 1.0
+    if len(answer.next_questions) > 1:
+        other_questions_weight = (1.0 - best_next_question_weight) / (len(answer.next_questions) - 1)
+
+    weights = {}
+    for question in answer.next_questions:
+        if question.is_conclusion():
+            continue
+        if question.value == best_next_question:
+            weights[question.value] = best_next_question_weight
+        else:
+            weights[question.value] = other_questions_weight
+    return weights
+
+
+def set_conclusion(answer, conclusion, hard_bias):
+    if hard_bias:
+        for next_node in answer.next_questions:
+            if next_node.is_conclusion() and next_node.value == conclusion:
+                answer.next_questions[next_node] = 1.0
+            else:
+                answer.next_questions[next_node] = 0.0
+    else:
+        other_weight = 1.0
+        if len(answer.next_questions) > 1:
+            other_weight = (1.0 - SOFT_WEIGHT) / (len(answer.next_questions) - 1)
+        for next_node in answer.next_questions:
+            if next_node.is_conclusion() and next_node.value == conclusion:
+                answer.next_questions[next_node] = SOFT_WEIGHT
+            else:
+                answer.next_questions[next_node] = other_weight
+
+
+def add_initial_biases(nodes, answers, conclusions, hard_bias=True):
+    for node in nodes:
+        weights = {}
+        for node_answer in node.answers.values():
+            hardwired = '*' + node_answer.answer
+            if node_answer.answer in conclusions or hardwired in conclusions:
+                if node_answer.answer in conclusions:
+                    conc = conclusions[node_answer.answer]
+                else:
+                    conc = conclusions[hardwired]
+                set_conclusion(node_answer, conc, hard_bias or hardwired in conclusions)
+            elif node_answer.answer in answers or hardwired in answers:
+                if node_answer.answer in answers:
+                    next_q = answers[node_answer.answer]
+                else:
+                    next_q = answers[hardwired]
+                weights[node_answer.answer] = get_next_question_initial_weights(node_answer, next_q, hard_bias or hardwired in conclusions)
+        add_weights(node, weights)
+
+
+def build_initial_graph(answers, questions, conclusions):
+    nodes = [build_node(q, questions[q]) for q in questions]
     connect_nodes(nodes)
     add_conclusions(nodes, conclusions)
+    add_initial_biases(nodes, answers, conclusions, False)
+
+    return nodes, QueryGraph(nodes)
+
+
+def rebuild_graph(questions, answers, conclusions, correlations):
+    nodes = [build_node(q, questions[q]) for q in questions]
+    connect_nodes(nodes)
+    add_conclusions(nodes, conclusions)
+    add_initial_biases(nodes, answers, conclusions, False)
+
+    for node in nodes:
+        add_correlations(node, correlations)
 
     return QueryGraph(nodes)
 
-def seed_weights(answers, questions, conclusions):
-    pass
 
-for a in answers:
-    for q in answers[a]:
-        if q in questions:
+nodes, graph = build_initial_graph(initial_answers, initial_questions, initial_conclusions)
 
 
-# questions = ["a?", "b?", "c?", "d?", "e?", "f?"]
-#
-#
-# answers = ["yes", "no"]
-#
-# conclusions = ["1", "2", "3", "4"]
+# Example: it seems that people who are from New Jersey are getting sick and are indifferent. Let's introduce this
+# as a hidden signal and see if we can find it.
+related_questions = ["What concerns you about coronavirus today?", "What would you like to know about social distancing?", "Where are you from?"]
+related_answers = ["I think I have been exposed to COVID-19", "Why should I care?", "New Jersey"]
+bias_signal = BiasHelper("", {related_questions[i]: related_answers[i] for i in range(len(related_questions))}, 0.5)
 
-
-bias_signal = BiasHelper(initial_conclusions[0], {"a?": "yes", "b?": "yes", "c?": "yes"}, 0.5)
+test_conclusions = [ic for ic in initial_conclusions.values()]
 
 
 def do_graph_session(graph):
-    conc = np.random.choice(conclusions, 1)[0]
+    conc = np.random.choice(test_conclusions, 1)[0]
     qs = QuerySession(graph, conc)
-    if conc == "1":
-        print("BIAS IN PLACE")
-        respondent = Respondent(bias_signal.get_biases())
-    else:
-        respondent = Respondent({})
-    for i in range(3):
-        print(qs.current_query.question)
+    respondent = Respondent(bias_signal.get_biases())
+    for i in range(NUM_QUESTIONS_TO_ASK):
         answer = respondent.answer_question(qs.current_query)
-        print(answer)
         qs.receive_answer_for_next_question(answer)
-        if respondent.biases:
-            print("biased")
-            if qs.current_query.question == "d?":
-                print("error")
-                yes_answers = qs.asked_questions[len(qs.asked_questions) - 1].answers["yes"]
-                print(yes_answers)
-                for q in yes_answers.next_questions:
-                    print(q.question)
-                    print(yes_answers.next_questions[q])
-    print("--------- END OF SESSION ---------")
+        if qs.current_query.is_conclusion():
+            break
     return qs.get_session_result()
 
 
-results = SessionResults(nodes, conclusions)
+results = SessionResults(nodes, test_conclusions)
 
-for i in range(1000):
-    results.add_result(do_graph_session(qg))
+for i in range(10000):
+    results.add_result(do_graph_session(graph))
 
+results.rank_line_of_questions(5)
 
-correlation_results = results.result_matrices[conclusions[0]].get_correlation()
+print("--------- REBUILDING ----------")
 
-
-# nodes = [build_node(q, answers) for q in questions]
-# connect_nodes(nodes)
-# add_conclusions(nodes, conclusions)
-
-for node in nodes:
-    add_weights(node, correlation_results[node.question])
-
-
-add_conclusions(nodes, conclusions)
-weighted_graph = QueryGraph(nodes)
+correlation_results = results.result_matrix.get_correlation()
+weighted_graph = rebuild_graph(initial_questions, initial_answers, initial_conclusions, correlation_results)
+results = SessionResults(nodes, test_conclusions)
 
 for i in range(1000):
     results.add_result(do_graph_session(weighted_graph))
+
+results.rank_line_of_questions(5)
